@@ -34,6 +34,49 @@ With these automations, you can **play music**, **adjust volume**, and **control
 
 ---
 
+## 📋 Automations Overview
+
+1. **Voice: Spiele Musik von <Artist>**  
+   🎤 *Plays music from a specific artist.*
+
+2. **Voice: Spiele Song <Song>**  
+   🎵 *Plays a specific song.*
+
+3. **Voice: Spiele Podcast <Podcast>**  
+   🎙️ *Plays a specific podcast.*
+
+4. **Voice: Spiele Radio von <Artist>**  
+   📻 *Plays the radio of a specific artist.*
+
+5. **Voice: Spiele Spotify und Lieblingssongs**  
+   ❤️ *Plays your favorite songs.*
+
+6. **Voice: Spiele Spotify Weekly**  
+   🔄 *Plays your weekly Spotify playlist (Spotify Weekly).*
+
+7. **Voice: Lautstärke ändern**  
+   🔊 *Adjusts the volume (up, down, or to a specific percentage).*
+
+8. **Voice: Nächstes Lied**  
+   ⏭️ *Skips to the next song.*
+
+9. **Voice: Zufällige Wiedergabe**  
+   🔀 *Toggles shuffle on or off.*
+
+10. **Voice: Spotify abspielen / Play**  
+    ▶️ *Starts Spotify playback.*
+
+11. **Voice: Spiele Playlist - v2**  
+    📂 *Plays a specific playlist, optionally in shuffle mode.*
+
+12. **Voice: Like Current Song**  
+    ⭐ *Marks the currently playing song as a favorite.*
+
+13. **Voice: Pause Spotify**  
+    ⏸️ *Pauses or stops Spotify playback.*
+
+---
+
 ## 🚀 Getting Started
 
 ### ✅ Prerequisites
