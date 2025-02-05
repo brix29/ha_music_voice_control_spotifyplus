@@ -1,4 +1,4 @@
-# 🎧 Home Assistant Spotify Voice Automations
+# 🎧 Home Assistant Spotify Voice Control Automations
 
 This repository contains a collection of **Home Assistant automations** that enable **voice-controlled Spotify playback** via custom conversation triggers.  
 With these automations, you can **play music**, **adjust volume**, and **control playback effortlessly**.
