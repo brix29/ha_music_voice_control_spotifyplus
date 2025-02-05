@@ -1,0 +1,132 @@
+- id: '1730541678527'
+  alias: 'Voice: Spiele Musik von <Artist>'
+  description: ''
+  triggers:
+  - trigger: conversation
+    command:
+    - Spiele [mir] Musik von {artist}
+    - Spiele [mir] Songs von {artist}
+    - Starte [mir] Musik von {artist}
+    - Leg [mir] Musik von {artist} auf
+    - Ich möchte Musik von {artist} hören
+  conditions:
+  - condition: template
+    value_template: "{{ not (trigger.sentence.lower() == 'spiele musik' or\n        trigger.sentence.lower() == 'spiele spotify' or\n         'radio' in trigger.sentence.lower() or               \n          'lieblingssongs' in trigger.sentence.lower() or\n         'lieblingsmusik' in trigger.sentence.lower() or\n         'playlist' in trigger.sentence.lower()) }}\n"
+  actions:
+  - action: script.play_spotify_on_<DEVICE>_source
+    data: {}
+  - action: spotifyplus.search_artists
+    metadata: {}
+    data:
+      entity_id: media_player.spotifyplus_<DEVICE>
+      criteria: '{{ trigger.slots.artist }}'
+      limit: 3
+    response_variable: resultspotify
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.spotifyplus_<DEVICE>
+    data:
+      media_content_id: spotify:artist:{{ resultspotify['result']['items'][0]['id'] }}
+      media_content_type: artist
+  - wait_for_trigger:
+    - trigger: state
+      entity_id:
+      - binary_sensor.<MEDIA_PLAYER_STATUS>
+      to: 'off'
+    timeout:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - action: media_player.media_play
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.spotifyplus_<DEVICE>
+  mode: single
+
+- id: '1730545045218'
+  alias: 'Voice: Spiele Song <Song>'
+  description: ''
+  triggers:
+  - trigger: conversation
+    command:
+    - Spiele [den] Song {song}
+    - Starte [den] Song {song}
+    - Leg [den Song] {song} auf
+    - Ich möchte [den Song] {song} hören
+    - Spiel [bitte] [den] Song {song}
+    - Lass [uns] [den] Song {song} hören
+  conditions: []
+  actions:
+  - action: script.play_spotify_on_<DEVICE>_source
+    data: {}
+  - action: spotifyplus.search_tracks
+    metadata: {}
+    data:
+      entity_id: media_player.spotifyplus_<DEVICE>
+      criteria: '{{ trigger.slots.song }}'
+      limit: 1
+    response_variable: resultsong
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.spotifyplus_<DEVICE>
+    data:
+      media_content_id: spotify:track:{{ resultsong['result']['items'][0]['id'] }}
+      media_content_type: track
+  mode: single
+
+- id: '1730550572695'
+  alias: 'Voice: Spiele Spotify und Lieblingssongs'
+  description: ''
+  triggers:
+  - trigger: conversation
+    command:
+    - Starte meine Lieblingssongs
+    - Spiele meine Lieblingssongs
+    - Spiele meine Lieblingsmusik
+  conditions: []
+  actions:
+  - action: script.play_spotify_on_<DEVICE>_source
+    data: {}
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.spotifyplus_<DEVICE>
+    data:
+      media_content_id: spotify:user:<USER_ID>:collection
+      media_content_type: playlist
+  mode: single
+
+- id: '1730553443702'
+  alias: 'Voice: Lautstärke ändern'
+  description: Adjust the volume or set it to a specific percentage
+  triggers:
+  - trigger: conversation
+    command:
+    - Leiser
+    - Lauter
+    - Lautstärke auf {volume}%
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - '{{ ''leiser'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_<DEVICE>
+        action: media_player.volume_down
+    - conditions:
+      - '{{ ''lauter'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_<DEVICE>
+        action: media_player.volume_up
+    - conditions:
+      - '{{ ''lautstärke auf'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_<DEVICE>
+        data:
+          volume_level: '{{ trigger.slots.volume | int / 100 }}'
+        action: media_player.volume_set
+  mode: single
