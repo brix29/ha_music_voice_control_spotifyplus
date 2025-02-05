@@ -33,16 +33,6 @@
       media_content_id: spotify:artist:{{ resultspotify['result']['items'][0]['id']
         }}
       media_content_type: artist
-  - wait_for_trigger:
-    - trigger: state
-      entity_id:
-      - binary_sensor.esp32_media_player_playing
-      to: 'off'
-    timeout:
-      hours: 0
-      minutes: 0
-      seconds: 3
-      milliseconds: 0
   - action: media_player.media_play
     metadata: {}
     data: {}
