@@ -38,8 +38,8 @@ With these automations, you can **play music**, **adjust volume**, and **control
 
 ### ✅ Prerequisites
 
-- **Home Assistant** with [SpotifyPlus](https://community.home-assistant.io/t/voice-music-control-with-spotifyplus-and-ha-voice-pe/837357)
-- Adjust entity IDs (e.g., `media_player.spotifyplus_lt12b`) and Spotify IDs as needed.
+- **Home Assistant** with [SpotifyPlus](https://community.home-assistant.io/t/spotifyplus-integration/698651) ( Big thanks to @thlucas )
+- Adjust entity IDs (e.g., `media_player.spotifyplus_yourID`) and Spotify IDs/links as needed.
 - Add the following helpers in your `configuration.yaml`:
 
 ### 🔧 Helpers Configuration
@@ -62,7 +62,7 @@ input_number:
 ```
 
 📢 Contributing
-Feel free to fork, suggest improvements, or add new automations!
+Feel free to fork, translate, suggest improvements, or add new automations!
 Contributions are always welcome. 😊
 
 For more details, check out the discussion here:
