@@ -1,119 +1,7 @@
-- id: '1730541678527'
-  alias: 'Voice: Spiele Musik von <Artist>'
-  description: ''
-  triggers:
-  - trigger: conversation
-    command:
-    - Spiele [mir] Musik von {artist}
-    - Spiele [mir] Songs von {artist}
-    - Starte [mir] Musik von {artist}
-    - Leg [mir] Musik von {artist} auf
-    - Ich möchte Musik von {artist} hören
-  conditions:
-  - condition: template
-    value_template: "{{ not (trigger.sentence.lower() == 'spiele musik' or\n        trigger.sentence.lower()
-      == 'spiele spotify' or\n         'radio' in trigger.sentence.lower() or               \n
-      \        'lieblingssongs' in trigger.sentence.lower() or\n         'lieblingsmusik'
-      in trigger.sentence.lower() or\n         'playlist' in trigger.sentence.lower())
-      }}\n"
-  actions:
-  - action: script.play_spotify_on_yourID_source
-    data: {}
-  - action: spotifyplus.search_artists
-    metadata: {}
-    data:
-      entity_id: media_player.spotifyplus_yourID
-      criteria: '{{ trigger.slots.artist }}'
-      limit: 3
-    response_variable: resultspotify
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.spotifyplus_yourID
-    data:
-      media_content_id: spotify:artist:{{ resultspotify['result']['items'][0]['id']
-        }}
-      media_content_type: artist
-  - action: media_player.media_play
-    metadata: {}
-    data: {}
-    target:
-      entity_id: media_player.spotifyplus_yourID
-  mode: single
-- id: '1730545045218'
-  alias: 'Voice: Spiele Song <Song>'
-  description: ''
-  triggers:
-  - trigger: conversation
-    command:
-    - Spiele [den] Song {song}
-    - Starte [den] Song {song}
-    - Leg [den Song] {song} auf
-    - Ich möchte [den Song] {song} hören
-    - Spiel [bitte] [den] Song {song}
-    - Lass [uns] [den] Song {song} hören
-    - Spiele [das] Lied {song}
-    - Starte [das] Lied {song}
-    - Leg das Lied {song} auf
-    - Ich möchte das Lied {song} hören
-    - Spiel [bitte] [das] Lied {song}
-    - Lass [uns] [das] Lied {song} hören
-    - Spiele [den] Track {song}
-    - Starte [den] Track {song}
-    - Leg den Track {song} auf
-    - Ich möchte den Track {song} hören
-    - Spiel [bitte] [den] Track {song}
-    - Lass [uns] [den] Track {song} hören
-  conditions: []
-  actions:
-  - action: script.play_spotify_on_yourID_source
-    data: {}
-  - action: spotifyplus.search_tracks
-    metadata: {}
-    data:
-      entity_id: media_player.spotifyplus_yourID
-      criteria: '{{ trigger.slots.song }}'
-      limit: 1
-    response_variable: resultsong
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.spotifyplus_yourID
-    data:
-      media_content_id: spotify:track:{{ resultsong['result']['items'][0]['id'] }}
-      media_content_type: track
-  mode: single
-- id: '1730545631172'
-  alias: 'Voice: Spiele Podcast <Podcast>'
-  description: ''
-  triggers:
-  - trigger: conversation
-    command:
-    - Spiele [den] Podcast {podcast}
-    - Starte [den] Podcast {podcast}
-    - Ich möchte [den] Podcast {podcast} hören
-    - Spiel [bitte] [den] Podcast {podcast}
-    - Lass [uns] [den] Podcast {podcast} hören
-  conditions: []
-  actions:
-  - action: script.play_spotify_on_yourID_source
-    data: {}
-  - action: spotifyplus.search_shows
-    metadata: {}
-    data:
-      entity_id: media_player.spotifyplus_yourID
-      criteria: '{{ trigger.slots.podcast }}'
-      limit: 1
-    response_variable: resultpodcast
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.spotifyplus_yourID
-    data:
-      media_content_id: spotify:show:{{ resultpodcast['result']['items'][0]['id']
-        }}
-      media_content_type: podcast
-  mode: single
-- id: '1730545803872'
-  alias: 'Voice: Spiele Radio von <Artist>'
-  description: ''
+- id: '1739227579468'
+  alias: 'Voice: Spotify Music Control'
+  description: Unified automation for playing music, playlists, radio, podcasts, and
+    more.
   triggers:
   - trigger: conversation
     command:
@@ -123,37 +11,253 @@
     - Ich möchte [das] Radio von {artist} hören
     - Spiele [bitte] [das] Radio von {artist}
     - Leg [das] Radio von {artist} auf
-    - Spiel das Künstler-Radio von {artist}
-    - Starte das Radio von {artist}
-    - Spiele {artist} Radio
-    - Mach {artist} Radio an
-    - Lass das Radio von {artist} laufen
-    - Starte die {artist} Radio-Station
-    - Ich will {artist} Radio hören
-    - Spiele [den] Radiosender von {artist}
-    - Starte [den] Radiosender von {artist}
-    - Lass [uns] [den] Radiosender von {artist} hören
-    - Ich möchte [den] Radiosender von {artist} hören
-    - Spiel [bitte] [den] Radiosender von {artist}
-    - Leg [den] Radiosender von {artist} auf
+    - Spiel [das] Künstler-Radio von {artist}
+    - Spiele [den] Song {song}
+    - Starte [den] Song {song}
+    - Leg [den Song] {song} auf
+    - Spiele {playlist} Musik
+    - Starte {playlist} Musik
+    - Spiele [das] Lied {song}
+    - Starte [das] Lied {song}
+    - Spiele [die] Playlist {playlist}
+    - Starte [die] Playlist {playlist}
+    - Spiele [den] Podcast {podcast}
+    - Starte [den] Podcast {podcast}
+    - Spiele [mir] Musik von {artist}
+    - '[Spiele] [etwas] anderes'
+    - Spiele Weekly
+    - Starte Weekly
   conditions: []
   actions:
-  - action: script.play_spotify_on_yourID_source
-    data: {}
-  - action: spotifyplus.search_playlists
+  - action: script.play_spotify_on_lt12b_source
     metadata: {}
-    data:
-      entity_id: media_player.spotifyplus_yourID
-      criteria: '{{ trigger.slots.artist }} Radio'
-      limit: 1
-    response_variable: resultplaylist
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.spotifyplus_yourID
-    data:
-      media_content_id: spotify:playlist:{{ resultplaylist['result']['items'][0]['id']
-        }}
-      media_content_type: playlist
+    data: {}
+    continue_on_error: true
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ "podcast" in trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: false
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        continue_on_error: true
+      - action: spotifyplus.search_shows
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.podcast }}'
+          limit: 1
+        response_variable: resultpodcast
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:show:{{ resultpodcast["result"]["items"][0]["id"]
+            }}
+          media_content_type: podcast
+      alias: Podcast
+    - conditions:
+      - condition: template
+        value_template: '{{ "weekly" in trigger.sentence.lower() }}'
+      sequence:
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:playlist:37abcdefghijkl
+          media_content_type: playlist
+      alias: Weekly
+    - conditions:
+      - condition: template
+        value_template: '{{ "radio" in trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: true
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        continue_on_error: true
+      - action: spotifyplus.search_artists
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.artist }}'
+        response_variable: resultartist
+      - action: spotifyplus.search_playlists
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.artist }} Radio'
+          limit: 1
+        response_variable: resultplaylist
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:artist:{{ resultartist["result"]["items"][0]["id"]
+            }}
+          media_content_type: artist
+      alias: Radio
+    - conditions:
+      - condition: template
+        value_template: '{{ ''musik'' in trigger.sentence.lower() and ''musik von''
+          not in trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: true
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        continue_on_error: true
+        alias: Zufällige Wiedergabe
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''zufällig'' in trigger.sentence.lower() or ''zufälliger
+              reihenfolge'' in trigger.sentence.lower() }}'
+          sequence:
+          - data:
+              entity_id: media_player.spotifyplus_yourID
+              shuffle: true
+            action: media_player.shuffle_set
+        enabled: false
+      - action: input_number.set_value
+        metadata: {}
+        data:
+          value: 0
+        target:
+          entity_id: input_number.voice_spotify_last_search_index
+      - data:
+          entity_id: input_text.voice_spotify_last_search
+          value: '{{ (trigger.slots.playlist if trigger.slots and ''playlist'' in
+            trigger.slots else ''Party'') | regex_replace(''zufällig|in zufälliger
+            reihenfolge'', '''', ignorecase=True) }}'
+        action: input_text.set_value
+      - action: spotifyplus.search_playlists
+        metadata: {}
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ (trigger.slots.playlist if trigger.slots and ''playlist''
+            in trigger.slots else ''Party'') | regex_replace(''zufällig|in zufälliger
+            reihenfolge'', '''', ignorecase=True) }}'
+          limit: 10
+        response_variable: resultplaylist
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:playlist:{{ resultplaylist['result']['items'][states('input_number.voice_spotify_last_search_index')
+            | int]['id'] }}
+          media_content_type: playlist
+      alias: Genre
+    - conditions:
+      - condition: template
+        value_template: '{{ "song" in trigger.sentence.lower() or "lied" in trigger.sentence.lower()
+          }}'
+      sequence:
+      - action: spotifyplus.search_tracks
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.song }}'
+          limit: 1
+        response_variable: resultsong
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:track:{{ resultsong["result"]["items"][0]["id"]
+            }}
+          media_content_type: track
+      alias: Song
+    - conditions:
+      - condition: template
+        value_template: '{{ "playlist" in trigger.sentence.lower() or "anderes" in
+          trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: true
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        alias: Zufällige Wiedergabe
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''zufällig'' in trigger.sentence.lower() or ''zufälliger
+              reihenfolge'' in trigger.sentence.lower() }}'
+          sequence:
+          - data:
+              entity_id: media_player.spotifyplus_yourID
+              shuffle: true
+            action: media_player.shuffle_set
+        enabled: false
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''andere'' in trigger.sentence.lower() }}'
+          sequence:
+          - data:
+              entity_id: input_number.voice_spotify_last_search_index
+              value: '{{ (states(''input_number.voice_spotify_last_search_index'')
+                | int + 1) % 10 }}'
+            action: input_number.set_value
+          - action: spotifyplus.search_playlists
+            metadata: {}
+            data:
+              entity_id: media_player.spotifyplus_yourID
+              criteria: '{{ states(''input_text.voice_spotify_last_search'') | regex_replace(''zufällig|in
+                zufälliger reihenfolge'', '''', ignorecase=True) }}'
+              limit: 10
+            response_variable: resultplaylist
+        default:
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: 0
+          target:
+            entity_id: input_number.voice_spotify_last_search_index
+        - data:
+            entity_id: input_text.voice_spotify_last_search
+            value: '{{ (trigger.slots.playlist if trigger.slots and ''playlist'' in
+              trigger.slots else ''Party'') | regex_replace(''zufällig|in zufälliger
+              reihenfolge'', '''', ignorecase=True) }}'
+          action: input_text.set_value
+        - action: spotifyplus.search_playlists
+          metadata: {}
+          data:
+            entity_id: media_player.spotifyplus_yourID
+            criteria: '{{ (trigger.slots.playlist if trigger.slots and ''playlist''
+              in trigger.slots else ''Party'') | regex_replace(''zufällig|in zufälliger
+              reihenfolge'', '''', ignorecase=True) }}'
+            limit: 10
+          response_variable: resultplaylist
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:playlist:{{ resultplaylist['result']['items'][states('input_number.voice_spotify_last_search_index')
+            | int]['id'] }}
+          media_content_type: playlist
+      alias: Playlists oder anderes
+    - conditions: []
+      sequence:
+      - action: spotifyplus.search_artists
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.artist }}'
+        response_variable: resultspotify
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:artist:{{ resultspotify["result"]["items"][0]["id"]
+            }}
+          media_content_type: artist
+      alias: Play only
   mode: single
 - id: '1730550572695'
   alias: 'Voice: Spiele Spotify und Lieblingssongs'
@@ -181,25 +285,6 @@
       entity_id: media_player.spotifyplus_yourID
     data:
       media_content_id: spotify:user:1111111111:collection
-      media_content_type: playlist
-  mode: single
-- id: '1730552153931'
-  alias: 'Voice: Spiele Spotify Weekly'
-  description: ''
-  triggers:
-  - trigger: conversation
-    command:
-    - Spiele Weekly
-    - Starte Weekly
-  conditions: []
-  actions:
-  - action: script.play_spotify_on_yourID_source
-    data: {}
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.spotifyplus_yourID
-    data:
-      media_content_id: spotify:playlist:37aaaaaaaaaaaaaaa
       media_content_type: playlist
   mode: single
 - id: '1730553443702'
@@ -343,105 +428,6 @@
       entity_id:
       - media_player.spotifyplus_yourID
     data: {}
-  mode: single
-- id: '1730622780948'
-  alias: 'Voice: Spiele Playlist - v2'
-  description: ''
-  triggers:
-  - trigger: conversation
-    command:
-    - Spiel[e] [die] [eine] Playlist [mit] {playlist} [Musik] [in zufälliger Reihenfolge]
-      [zufällig]
-    - Starte [die] [eine] Playlist [mit] {playlist} [Musik] [in zufälliger Reihenfolge]
-      [zufällig]
-    - Leg [die] [eine] Playlist [mit] {playlist} [Musik] [in zufälliger Reihenfolge]
-      [zufällig] auf
-    - Ich möchte [die] [eine] Playlist [mit] {playlist} [Musik] [in zufälliger Reihenfolge]
-      [zufällig] hören
-    - Spiel [bitte] [die] [eine] Playlist [mit] {playlist} [Musik] [in zufälliger
-      Reihenfolge] [zufällig]
-    - Lass [uns] [die] [eine] Playlist [mit] {playlist} [Musik] [in zufälliger Reihenfolge]
-      [zufällig] hören
-    - Spiel[e] [eine] andere Playlist
-    - Spiel[e] {playlist} [Musik]
-    - Spiel[e] andere Musik
-    - Spiel[e] [die] Playlist {playlist} [in zufälliger Reihenfolge] [zufällig]
-    - Spiel[e] {playlist} [in zufälliger Reihenfolge] [zufällig]
-    - Andere Playlist
-    - Andere Musik
-  conditions:
-  - condition: template
-    value_template: "{{ not ('spotify' in trigger.sentence.lower() or\n         'weekly'
-      in trigger.sentence.lower() or\n         'radio' in trigger.sentence.lower()
-      or               \n         'lieblingssongs' in trigger.sentence.lower() or\n
-      \        'lieblingsmusik' in trigger.sentence.lower() or\n         'podcast'
-      in trigger.sentence.lower() or\n         'track' in trigger.sentence.lower()
-      or\n         'lied' in trigger.sentence.lower() or\n         'musik von' in
-      trigger.sentence.lower() or  \n         'songs von' in trigger.sentence.lower()
-      or  \n         'Nachrichten' in trigger.sentence.lower() or  \n         'radiosender'
-      in trigger.sentence.lower() or\n         'track' in trigger.sentence.lower()
-      or\n         'song' in trigger.sentence.lower()) }}\n"
-  actions:
-  - action: script.play_spotify_on_yourID_source
-    metadata: {}
-    data: {}
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ ''zufällig'' in trigger.sentence.lower() or ''zufälliger
-          reihenfolge'' in trigger.sentence.lower() }}'
-      sequence:
-      - data:
-          entity_id: media_player.spotifyplus_yourID
-          shuffle: true
-        action: media_player.shuffle_set
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ ''andere'' in trigger.sentence.lower() }}'
-      sequence:
-      - data:
-          entity_id: input_number.voice_spotify_last_search_index
-          value: '{{ (states(''input_number.voice_spotify_last_search_index'') | int
-            + 1) % 10 }}'
-        action: input_number.set_value
-      - action: spotifyplus.search_playlists
-        metadata: {}
-        data:
-          entity_id: media_player.spotifyplus_yourID
-          criteria: '{{ states(''input_text.voice_spotify_last_search'') | regex_replace(''zufällig|in
-            zufälliger reihenfolge'', '''', ignorecase=True) }}'
-          limit: 10
-        response_variable: resultplaylist
-    default:
-    - action: input_number.set_value
-      metadata: {}
-      data:
-        value: 0
-      target:
-        entity_id: input_number.voice_spotify_last_search_index
-    - data:
-        entity_id: input_text.voice_spotify_last_search
-        value: '{{ (trigger.slots.playlist if trigger.slots and ''playlist'' in trigger.slots
-          else ''Party'') | regex_replace(''zufällig|in zufälliger reihenfolge'',
-          '''', ignorecase=True) }}'
-      action: input_text.set_value
-    - action: spotifyplus.search_playlists
-      metadata: {}
-      data:
-        entity_id: media_player.spotifyplus_yourID
-        criteria: '{{ (trigger.slots.playlist if trigger.slots and ''playlist'' in
-          trigger.slots else ''Party'') | regex_replace(''zufällig|in zufälliger reihenfolge'',
-          '''', ignorecase=True) }}'
-        limit: 10
-      response_variable: resultplaylist
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.spotifyplus_yourID
-    data:
-      media_content_id: spotify:playlist:{{ resultplaylist['result']['items'][states('input_number.voice_spotify_last_search_index')
-        | int]['id'] }}
-      media_content_type: playlist
   mode: single
 - id: '1730625469560'
   alias: 'Voice: Like Current Song'
