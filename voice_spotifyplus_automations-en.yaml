@@ -1,0 +1,478 @@
+- id: '1739227579468'
+  alias: 'Voice: Spotify Music Control'
+  description: Unified automation for playing music, playlists, radio, podcasts, and
+    more.
+  triggers:
+  - trigger: conversation
+    command:
+    - Play [the] radio from {artist}
+    - Start [the] radio from {artist}
+    - Let [us] listen to [the] radio from {artist}
+    - I would like to listen to [the] radio from {artist}
+    - Play [please] [the] radio from {artist}
+    - Put on [the] radio from {artist}
+    - Play [the] artist radio from {artist}
+    - Play [the] song {song}
+    - Start [the] song {song}
+    - Put on [the song] {song}
+    - Play {playlist} music
+    - Start {playlist} music
+    - Play [the] song {song}
+    - Start [the] song {song}
+    - Play [the] playlist {playlist}
+    - Start [the] playlist {playlist}
+    - Play [the] podcast {podcast}
+    - Start [the] podcast {podcast}
+    - Play [me] music from {artist}
+    - '[Play] [something] else'
+    - Play Weekly
+    - Start Weekly
+  conditions: []
+  actions:
+  - action: script.play_spotify_on_lt12b_source
+    metadata: {}
+    data: {}
+    continue_on_error: true
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ "podcast" in trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: false
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        continue_on_error: true
+      - action: spotifyplus.search_shows
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.podcast }}'
+          limit: 1
+        response_variable: resultpodcast
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:show:{{ resultpodcast["result"]["items"][0]["id"]
+            }}
+          media_content_type: podcast
+      alias: Podcast
+    - conditions:
+      - condition: template
+        value_template: '{{ "weekly" in trigger.sentence.lower() }}'
+      sequence:
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:playlist:37abcdefghijkl
+          media_content_type: playlist
+      alias: Weekly
+    - conditions:
+      - condition: template
+        value_template: '{{ "radio" in trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: true
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        continue_on_error: true
+      - action: spotifyplus.search_artists
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.artist }}'
+        response_variable: resultartist
+      - action: spotifyplus.search_playlists
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.artist }} Radio'
+          limit: 1
+        response_variable: resultplaylist
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:artist:{{ resultartist["result"]["items"][0]["id"]
+            }}
+          media_content_type: artist
+      alias: Radio
+    - conditions:
+      - condition: template
+        value_template: '{{ ''musik'' in trigger.sentence.lower() and ''musik von''
+          not in trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: true
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        continue_on_error: true
+        alias: Random playback
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''random'' in trigger.sentence.lower() or ''random
+                        order'' in trigger.sentence.lower() }}'
+          sequence:
+          - data:
+              entity_id: media_player.spotifyplus_yourID
+              shuffle: true
+            action: media_player.shuffle_set
+        enabled: false
+      - action: input_number.set_value
+        metadata: {}
+        data:
+          value: 0
+        target:
+          entity_id: input_number.voice_spotify_last_search_index
+      - data:
+          entity_id: input_text.voice_spotify_last_search
+          value: '{{ (trigger.slots.playlist if trigger.slots and ''playlist'' in
+            trigger.slots else ''Party'') | regex_replace(''random|in random
+                      order'', '''', ignorecase=True) }}'
+        action: input_text.set_value
+      - action: spotifyplus.search_playlists
+        metadata: {}
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ (trigger.slots.playlist if trigger.slots and ''playlist''
+            in trigger.slots else ''Party'') | regex_replace(''random|in random
+                      order'', '''', ignorecase=True) }}'
+          limit: 10
+        response_variable: resultplaylist
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:playlist:{{ resultplaylist['result']['items'][states('input_number.voice_spotify_last_search_index')
+            | int]['id'] }}
+          media_content_type: playlist
+      alias: Genre
+    - conditions:
+      - condition: template
+        value_template: '{{ "song" in trigger.sentence.lower() or "lied" in trigger.sentence.lower()
+          }}'
+      sequence:
+      - action: spotifyplus.search_tracks
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.song }}'
+          limit: 1
+        response_variable: resultsong
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:track:{{ resultsong["result"]["items"][0]["id"]
+            }}
+          media_content_type: track
+      alias: Song
+    - conditions:
+      - condition: template
+        value_template: '{{ "playlist" in trigger.sentence.lower() or "anderes" in
+          trigger.sentence.lower() }}'
+      sequence:
+      - action: spotifyplus.player_set_shuffle_mode
+        metadata: {}
+        data:
+          state: true
+          entity_id: media_player.spotifyplus_yourID
+          delay: 1
+        alias: Random Playback
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''random'' in trigger.sentence.lower() or ''random
+              order'' in trigger.sentence.lower() }}'
+          sequence:
+          - data:
+              entity_id: media_player.spotifyplus_yourID
+              shuffle: true
+            action: media_player.shuffle_set
+        enabled: false
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ ''other'' in trigger.sentence.lower() }}'
+          sequence:
+          - data:
+              entity_id: input_number.voice_spotify_last_search_index
+              value: '{{ (states(''input_number.voice_spotify_last_search_index'')
+                | int + 1) % 10 }}'
+            action: input_number.set_value
+          - action: spotifyplus.search_playlists
+            metadata: {}
+            data:
+              entity_id: media_player.spotifyplus_yourID
+              criteria: '{{ states(''input_text.voice_spotify_last_search'') | regex_replace(''random|in
+                random order'', '''', ignorecase=True) }}'
+              limit: 10
+            response_variable: resultplaylist
+        default:
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: 0
+          target:
+            entity_id: input_number.voice_spotify_last_search_index
+        - data:
+            entity_id: input_text.voice_spotify_last_search
+            value: '{{ (trigger.slots.playlist if trigger.slots and ''playlist'' in
+              trigger.slots else ''Party'') | regex_replace(''random|in random
+              order'', '''', ignorecase=True) }}'
+          action: input_text.set_value
+        - action: spotifyplus.search_playlists
+          metadata: {}
+          data:
+            entity_id: media_player.spotifyplus_yourID
+            criteria: '{{ (trigger.slots.playlist if trigger.slots and ''playlist''
+              in trigger.slots else ''Party'') | regex_replace(''random|in random
+              order'', '''', ignorecase=True) }}'
+            limit: 10
+          response_variable: resultplaylist
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:playlist:{{ resultplaylist['result']['items'][states('input_number.voice_spotify_last_search_index')
+            | int]['id'] }}
+          media_content_type: playlist
+      alias: Playlists or other
+    - conditions: []
+      sequence:
+      - action: spotifyplus.search_artists
+        data:
+          entity_id: media_player.spotifyplus_yourID
+          criteria: '{{ trigger.slots.artist }}'
+        response_variable: resultspotify
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          media_content_id: spotify:artist:{{ resultspotify["result"]["items"][0]["id"]
+            }}
+          media_content_type: artist
+      alias: Play only
+  mode: single
+- id: '1730550572695'
+  alias: 'Voice: Play Spotify and Favorite Songs'
+  description: ''
+  triggers:
+  - trigger: conversation
+    command:
+    - Start my favorite songs
+    - Play my favorite songs
+    - Play my favorite music
+  conditions: []
+  actions:
+  - action: script.play_spotify_on_yourID_source
+    data: {}
+  - action: spotifyplus.search_playlists
+    metadata: {}
+    data:
+      entity_id: media_player.spotifyplus_yourID
+      criteria: '{{ trigger.slots.playlist }}'
+      limit: 1
+    response_variable: resultplaylist
+    enabled: false
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.spotifyplus_yourID
+    data:
+      media_content_id: spotify:user:1111111111:collection
+      media_content_type: playlist
+  mode: single
+- id: '1730553443702'
+  alias: 'Voice: Change Volume'
+  description: Adjust the volume or set it to a specific percentage
+  triggers:
+  - trigger: conversation
+    command:
+    - Quieter
+    - Louder
+    - Make quieter
+    - Make louder
+    - Much quieter
+    - Much louder
+    - Volume to {volume}%
+    - Volume to {volume}%
+    - Full volume
+    - Maximum volume
+    - Make full volume
+    - Turn it up full
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - '{{ ''quieter'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        action: media_player.volume_down
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        action: media_player.volume_down
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        action: media_player.volume_down
+    - conditions:
+      - '{{ ''louder'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        action: media_player.volume_up
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        action: media_player.volume_up
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        action: media_player.volume_up
+    - conditions:
+      - '{{ ''full volume'' in trigger.sentence.lower() or ''maximum volume''
+        in trigger.sentence.lower() or ''dreh voll auf'' in trigger.sentence.lower()
+        }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          volume_level: 1
+        action: media_player.volume_set
+    - conditions:
+      - '{{ ''volume to'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          volume_level: '{{ trigger.slots.volume | int / 100 }}'
+        action: media_player.volume_set
+  mode: single
+- id: '1730553837629'
+  alias: 'Voice: Next Song'
+  description: Skip to the next track on Spotify
+  triggers:
+  - trigger: conversation
+    command:
+    - Next song
+    - Skip
+    - Continue
+    - Next
+  conditions: []
+  actions:
+  - target:
+      entity_id: media_player.spotifyplus_yourID
+    action: media_player.media_next_track
+  mode: single
+- id: '1730553973956'
+  alias: 'Voice: Random Playback'
+  description: Toggle shuffle on or off for Spotify
+  triggers:
+  - trigger: conversation
+    command:
+    - Random playback on
+    - Shuffle on
+    - Random playback off
+    - Shuffle off
+    - Random playback
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - '{{ ''on'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          shuffle: true
+        action: media_player.shuffle_set
+    - conditions:
+      - condition: template
+        value_template: '{{ ''off'' in trigger.sentence.lower() }}'
+      sequence:
+      - target:
+          entity_id: media_player.spotifyplus_yourID
+        data:
+          shuffle: false
+        action: media_player.shuffle_set
+  mode: single
+- id: '1730554056789'
+  alias: 'Voice: Spotify play / Play'
+  description: ''
+  triggers:
+  - trigger: conversation
+    command:
+    - Play music
+    - Start Spotify
+    - Play Spotify
+    - Start music
+  conditions: []
+  actions:
+  - action: script.play_spotify_on_lt12b_source
+    data: {}
+  - action: spotifyplus.search_playlists
+    metadata: {}
+    data:
+      entity_id: media_player.spotifyplus_yourID
+      criteria: '{{ trigger.slots.playlist }}'
+      limit: 1
+    response_variable: resultplaylist
+    enabled: false
+  - action: media_player.media_play
+    target:
+      entity_id:
+      - media_player.spotifyplus_yourID
+    data: {}
+  mode: single
+- id: '1730625469560'
+  alias: 'Voice: Like Current Song'
+  description: Like the currently playing song on Spotify
+  triggers:
+  - trigger: conversation
+    command:
+    - I like [this] [the] song
+    - Like song
+    - I like [this] [the] song
+    - Like song
+    - I like [the] [this] song
+    - Add [the] [this] song to my favorites
+    - Save [the] [this] song
+    - Add song to my favorites
+    - Save [this] [the] song
+    - Add this song to favorites
+    - Save [this] [the] track
+    - Like track
+    - I like [this] [the] track
+    - Save track
+    - Save song
+    - Save song
+    - Add song to favorites
+    - Add this track to my favorites
+    - I like [this] [the] song
+    - Save this song
+    - like [this] [the] song
+  conditions: []
+  actions:
+  - data:
+      entity_id: media_player.spotifyplus_yourID
+    action: spotifyplus.save_track_favorites
+  mode: single
+- id: '1730637071634'
+  alias: 'Voice: Pause Spotify'
+  description: Pause or stop the Spotify playback
+  triggers:
+  - trigger: conversation
+    command:
+    - '[Music] [Spotify] Pause'
+    - '[Music] [Spotify] Stop'
+    - '[Turn] Spotify off'
+    - '[Turn the] music off'
+  conditions: []
+  actions:
+  - target:
+      entity_id: media_player.spotifyplus_yourID
+    action: media_player.media_pause
+  mode: single
